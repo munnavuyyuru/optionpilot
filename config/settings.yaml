@@ -1,0 +1,13 @@
+environment: paper
+
+trading:
+  enabled: true
+  paper_only: true
+
+risk:
+  max_order_notional_usd: 1000
+  max_daily_loss_usd: 500
+  max_open_positions: 5
+
+agent:
+  autonomous_execution: false
