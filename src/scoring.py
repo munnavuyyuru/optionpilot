@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from options_selector import OptionCandidate
+from options_selector import OptionCandidate, build_debit_spread
 from signals import MarketSignal
 
 
@@ -14,6 +14,8 @@ class ScoredCandidate:
     total_score: float
     eligible: bool
     reasons: tuple[str, ...]
+    max_reward: float = 0.0
+    max_loss: float = 0.0
 
 
 def score_candidate(
@@ -44,6 +46,31 @@ def score_candidate(
         and market_signal.direction != "neutral"
     )
 
+    # Calculate max_reward and max_loss for debit spread
+    max_reward = 0.0
+    max_loss = 0.0
+    spread = build_debit_spread(
+        direction=market_signal.direction,
+        long_contract=candidate.contract,
+        chain={candidate.snapshot.symbol: candidate.snapshot},
+        width=5.0,
+    )
+    if spread:
+        long_leg, short_leg = spread
+        long_mid = long_leg.snapshot.midpoint
+        short_mid = short_leg.snapshot.midpoint
+        if long_mid is not None and short_mid is not None:
+            if market_signal.direction == "bullish":
+                # Bull call spread: pay net debit, max reward = width - debit
+                debit = long_mid - short_mid
+                max_loss = debit * 100
+                max_reward = (width * 100) - max_loss
+            else:
+                # Bear put spread: pay net debit
+                debit = long_mid - short_mid
+                max_loss = debit * 100
+                max_reward = (width * 100) - max_loss
+
     reasons = (
         f"market_score={market_signal.score:.2f}",
         f"options_score={candidate.options_score:.2f}",
@@ -57,6 +84,8 @@ def score_candidate(
         total_score=total_score,
         eligible=eligible,
         reasons=reasons,
+        max_reward=max_reward,
+        max_loss=max_loss,
     )
 
 
