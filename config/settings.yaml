@@ -94,3 +94,17 @@ phase2:
 
   execution:
     enabled: false
+
+phase3:
+  conviction:
+    min_trade_conviction: 75
+    min_evidence_quality: 60.0
+    max_unresolved_contradictions: 2
+    min_bull_confidence: 70
+    max_bear_confidence_for_trade: 75
+  evidence:
+    max_age_hours: 4
+    min_items: 2
+  strategies:
+    bullish: "BULL_CALL_DEBIT_SPREAD"
+    bearish: "BEAR_PUT_DEBIT_SPREAD"
