@@ -49,11 +49,12 @@ def score_candidate(
     # Calculate max_reward and max_loss for debit spread
     max_reward = 0.0
     max_loss = 0.0
+    spread_width = 5.0
     spread = build_debit_spread(
         direction=market_signal.direction,
         long_contract=candidate.contract,
         chain={candidate.snapshot.symbol: candidate.snapshot},
-        width=5.0,
+        width=spread_width,
     )
     if spread:
         long_leg, short_leg = spread
@@ -64,12 +65,12 @@ def score_candidate(
                 # Bull call spread: pay net debit, max reward = width - debit
                 debit = long_mid - short_mid
                 max_loss = debit * 100
-                max_reward = (width * 100) - max_loss
+                max_reward = (spread_width * 100) - max_loss
             else:
                 # Bear put spread: pay net debit
                 debit = long_mid - short_mid
                 max_loss = debit * 100
-                max_reward = (width * 100) - max_loss
+                max_reward = (spread_width * 100) - max_loss
 
     reasons = (
         f"market_score={market_signal.score:.2f}",

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from alpaca.data.requests import (
     StockBarsRequest,
@@ -35,7 +35,7 @@ def get_daily_bars(
 ) -> list[PriceBar]:
     client = create_stock_data_client()
 
-    end = datetime.now(timezone.utc)
+    end = datetime.now(UTC)
     start = end - timedelta(days=lookback_days)
 
     request = StockBarsRequest(

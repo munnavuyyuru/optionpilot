@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from conviction_models import (
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 def _make_evidence_id(kind: str, symbol: str, suffix: str = "") -> str:
-    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    date_str = datetime.now(UTC).strftime("%Y%m%d")
     base = f"{kind}-{symbol.upper()}-{date_str}"
     return f"{base}-{suffix}" if suffix else base
 
@@ -41,7 +41,7 @@ def _signal_to_evidence(signal, symbol: str) -> list[EvidenceItem]:
             kind=kind_map.get(component.name, EvidenceKind.TECHNICAL),
             source="phase2_signal",
             title=component.name.title(),
-            observed_at=datetime.now(timezone.utc),
+            observed_at=datetime.now(UTC),
             summary=component.reason,
             relevance=int(component.weight * 100),
             quality=85,
@@ -53,7 +53,7 @@ def _signal_to_evidence(signal, symbol: str) -> list[EvidenceItem]:
 
 
 def _option_chain_to_evidence(
-    chain: dict[str, "OptionSnapshotData"],
+    chain: dict[str, OptionSnapshotData],
     symbol: str,
     selected_contracts: list[SelectorOptionCandidate],
 ) -> list[EvidenceItem]:
@@ -72,7 +72,7 @@ def _option_chain_to_evidence(
                 kind=EvidenceKind.OPTIONS,
                 source="phase2_option_chain",
                 title=f"IV {sym}",
-                observed_at=datetime.now(timezone.utc),
+                observed_at=datetime.now(UTC),
                 summary=f"Implied volatility {snap.implied_volatility:.2%}",
                 relevance=80,
                 quality=90,
@@ -88,7 +88,7 @@ def _option_chain_to_evidence(
                 kind=EvidenceKind.OPTIONS,
                 source="phase2_option_chain",
                 title=f"Greeks {sym}",
-                observed_at=datetime.now(timezone.utc),
+                observed_at=datetime.now(UTC),
                 summary=f"Delta={snap.delta:.3f} Gamma={snap.gamma:.4f} Theta={snap.theta:.4f} Vega={snap.vega:.4f}",
                 relevance=85,
                 quality=90,
@@ -107,7 +107,7 @@ def _risk_to_evidence(symbol: str, passed: bool, reasons: tuple[str, ...], failu
         kind=EvidenceKind.RISK,
         source="phase2_risk",
         title="Risk Validation",
-        observed_at=datetime.now(timezone.utc),
+        observed_at=datetime.now(UTC),
         summary="Risk check " + ("passed" if passed else "failed"),
         relevance=95,
         quality=100,
@@ -120,7 +120,7 @@ def _risk_to_evidence(symbol: str, passed: bool, reasons: tuple[str, ...], failu
 def scored_candidate_to_option_candidate(
     scored: ScoredCandidate,
     signal,
-    chain: dict[str, "OptionSnapshotData"],
+    chain: dict[str, OptionSnapshotData],
     risk_result=None,
 ) -> OptionCandidate:
     """
@@ -163,7 +163,7 @@ def scored_candidate_to_option_candidate(
     evidence_package = EvidencePackage(items=tuple(evidence_items))
 
     return OptionCandidate(
-        candidate_id=f"{option.contract.underlying_symbol}-CAND-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}",
+        candidate_id=f"{option.contract.underlying_symbol}-CAND-{datetime.now(UTC).strftime('%Y%m%d%H%M')}",
         underlying=option.contract.underlying_symbol,
         direction=direction_enum,
         strategy="BULL_CALL_DEBIT_SPREAD" if direction == "BULLISH" else "BEAR_PUT_DEBIT_SPREAD",

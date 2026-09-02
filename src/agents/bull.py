@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from conviction_models import BearThesis, BullThesis, OptionCandidate
+from conviction_models import BullThesis, OptionCandidate
 
 
 class BullAgent(ABC):

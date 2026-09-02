@@ -8,7 +8,7 @@ Maintains per-(date, symbol, order_type) sequence counters.
 import json
 import os
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -18,8 +18,7 @@ try:
 except ImportError:
     HAS_PORTALOCKER = False
 
-from .order_id import generate_client_order_id, parse_client_order_id
-
+from .order_id import generate_client_order_id
 
 DEFAULT_STORE_PATH = Path("orders.json")
 
@@ -41,27 +40,27 @@ class OrderStore:
         }
     }
     """
-    
+
     def __init__(self, path: Path | str = DEFAULT_STORE_PATH):
         self.path = Path(path)
         self._lock = threading.RLock()
         self._file_lock = None
         self._data: dict[str, Any] = {"version": 1, "orders": {}, "counters": {}}
         self._load()
-    
+
     def _get_file_lock(self):
         """Get or create file lock for cross-process safety."""
         if HAS_PORTALOCKER and self._file_lock is None:
             lock_path = self.path.with_suffix(".lock")
             self._file_lock = portalocker.Lock(str(lock_path), timeout=10)
         return self._file_lock
-    
+
     def _load(self) -> None:
         """Load orders from JSON file."""
         with self._lock:
             if self.path.exists():
                 try:
-                    with open(self.path, "r") as f:
+                    with open(self.path) as f:
                         if HAS_PORTALOCKER:
                             lock = self._get_file_lock()
                             with lock:
@@ -72,12 +71,12 @@ class OrderStore:
                     self._data = {"version": 1, "orders": {}, "counters": {}}
             else:
                 self._data = {"version": 1, "orders": {}, "counters": {}}
-            
+
             # Ensure required keys exist
             self._data.setdefault("version", 1)
             self._data.setdefault("orders", {})
             self._data.setdefault("counters", {})
-    
+
     def _save(self) -> None:
         """Atomically save orders to JSON file."""
         with self._lock:
@@ -98,38 +97,38 @@ class OrderStore:
                 if temp_path.exists():
                     temp_path.unlink(missing_ok=True)
                 raise
-    
+
     def _get_date_key(self, dt: datetime | None = None) -> str:
         """Get date key in YYYY-MM-DD format."""
         if dt is None:
-            dt = datetime.now(timezone.utc)
+            dt = datetime.now(UTC)
         return dt.strftime("%Y-%m-%d")
-    
+
     def _increment_counter(
-        self, 
-        symbol: str, 
-        order_type: str, 
+        self,
+        symbol: str,
+        order_type: str,
         date: datetime | None = None
     ) -> int:
         """Increment and return the sequence counter for (date, symbol, order_type)."""
         date_key = self._get_date_key(date)
         symbol_upper = symbol.upper()
         type_upper = order_type.upper()
-        
+
         if date_key not in self._data["counters"]:
             self._data["counters"][date_key] = {}
         if symbol_upper not in self._data["counters"][date_key]:
             self._data["counters"][date_key][symbol_upper] = {}
         if type_upper not in self._data["counters"][date_key][symbol_upper]:
             self._data["counters"][date_key][symbol_upper][type_upper] = 0
-        
+
         self._data["counters"][date_key][symbol_upper][type_upper] += 1
         return self._data["counters"][date_key][symbol_upper][type_upper]
-    
+
     def generate_and_reserve_id(
-        self, 
-        symbol: str, 
-        order_type: str, 
+        self,
+        symbol: str,
+        order_type: str,
         date: datetime | None = None
     ) -> str:
         """
@@ -138,7 +137,7 @@ class OrderStore:
         """
         sequence = self._increment_counter(symbol, order_type, date)
         return generate_client_order_id(symbol, order_type, date, sequence)
-    
+
     def save_order(
         self,
         client_order_id: str,
@@ -159,14 +158,14 @@ class OrderStore:
         # Convert Alpaca order to dict if needed
         if hasattr(alpaca_order, "__dict__"):
             order_dict = {
-                k: v for k, v in alpaca_order.__dict__.items() 
+                k: v for k, v in alpaca_order.__dict__.items()
                 if not k.startswith("_")
             }
         elif isinstance(alpaca_order, dict):
             order_dict = alpaca_order
         else:
             order_dict = {"raw": str(alpaca_order)}
-        
+
         # Extract key fields
         alpaca_order_id = order_dict.get("id") or order_dict.get("order_id")
         symbol = order_dict.get("symbol")
@@ -178,7 +177,7 @@ class OrderStore:
         filled_qty = order_dict.get("filled_qty", "0")
         created_at = order_dict.get("created_at") or order_dict.get("submitted_at")
         filled_at = order_dict.get("filled_at")
-        
+
         record = {
             "client_order_id": client_order_id,
             "alpaca_order_id": alpaca_order_id,
@@ -193,15 +192,15 @@ class OrderStore:
             "filled_at": filled_at,
             "metadata": metadata or {},
             "raw_alpaca_response": order_dict,
-            "stored_at": datetime.now(timezone.utc).isoformat(),
+            "stored_at": datetime.now(UTC).isoformat(),
         }
-        
+
         with self._lock:
             self._data["orders"][client_order_id] = record
             self._save()
-        
+
         return record
-    
+
     def update_order_status(
         self,
         client_order_id: str,
@@ -214,7 +213,7 @@ class OrderStore:
         with self._lock:
             if client_order_id not in self._data["orders"]:
                 return False
-            
+
             record = self._data["orders"][client_order_id]
             record["status"] = status
             if filled_price is not None:
@@ -223,16 +222,16 @@ class OrderStore:
                 record["filled_qty"] = filled_qty
             if filled_at is not None:
                 record["filled_at"] = filled_at
-            record["updated_at"] = datetime.now(timezone.utc).isoformat()
-            
+            record["updated_at"] = datetime.now(UTC).isoformat()
+
             self._save()
             return True
-    
+
     def get_order(self, client_order_id: str) -> dict | None:
         """Get order by client_order_id."""
         with self._lock:
             return self._data["orders"].get(client_order_id)
-    
+
     def get_order_by_alpaca_id(self, alpaca_order_id: str) -> dict | None:
         """Reverse lookup: find order by Alpaca order ID."""
         with self._lock:
@@ -240,7 +239,7 @@ class OrderStore:
                 if record.get("alpaca_order_id") == alpaca_order_id:
                     return record
             return None
-    
+
     def list_orders(
         self,
         symbol: str | None = None,
@@ -262,11 +261,11 @@ class OrderStore:
                 if order_type and record.get("type") != order_type:
                     continue
                 results.append(record)
-            
+
             # Sort by created_at descending (newest first)
             results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
             return results[:limit]
-    
+
     def get_orders_for_model_learning(
         self,
         symbol: str | None = None,
@@ -277,13 +276,13 @@ class OrderStore:
         Includes P&L, timing, and outcome data.
         """
         with self._lock:
-            cutoff_date = datetime.now(timezone.utc)
+            cutoff_date = datetime.now(UTC)
             results = []
-            
+
             for record in self._data["orders"].values():
                 if symbol and record.get("symbol") != symbol.upper():
                     continue
-                
+
                 # Filter by date
                 created_str = record.get("created_at", "")
                 try:
@@ -292,7 +291,7 @@ class OrderStore:
                         continue
                 except (ValueError, AttributeError):
                     pass
-                
+
                 # Compute P&L if filled
                 pnl = None
                 if record.get("filled_price") and record.get("filled_qty"):
@@ -303,7 +302,7 @@ class OrderStore:
                         pnl = side_mult * fill_price * fill_qty
                     except (ValueError, TypeError):
                         pass
-                
+
                 results.append({
                     "client_order_id": record["client_order_id"],
                     "symbol": record.get("symbol"),
@@ -318,18 +317,18 @@ class OrderStore:
                     "filled_at": record.get("filled_at"),
                     "metadata": record.get("metadata", {}),
                 })
-            
+
             results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
             return results
-    
+
     def get_counter(self, symbol: str, order_type: str, date: datetime | None = None) -> int:
         """Get current counter value without incrementing."""
         date_key = self._get_date_key(date)
         symbol_upper = symbol.upper()
         type_upper = order_type.upper()
-        
+
         return self._data["counters"].get(date_key, {}).get(symbol_upper, {}).get(type_upper, 0)
-    
+
     def sync_from_alpaca(self, alpaca_orders: list[dict]) -> int:
         """
         Sync orders from Alpaca API (for orders placed outside this system).
@@ -341,35 +340,35 @@ class OrderStore:
                 alpaca_id = order.get("id")
                 if not alpaca_id:
                     continue
-                
+
                 # Check if already tracked
                 if self.get_order_by_alpaca_id(alpaca_id):
                     continue
-                
+
                 # Generate a client_order_id for historical order
                 symbol = order.get("symbol", "UNKNOWN")
                 order_type = order.get("order_class", "STOCK").upper()
                 if order_type not in ["STOCK", "CALL", "PUT", "SPREAD", "BRACKET", "OCO", "OTO"]:
                     order_type = "STOCK"
-                
+
                 # Use order creation date for counter
                 created_str = order.get("created_at") or order.get("submitted_at")
                 try:
                     created_dt = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
                 except (ValueError, AttributeError):
-                    created_dt = datetime.now(timezone.utc)
-                
+                    created_dt = datetime.now(UTC)
+
                 client_order_id = self.generate_and_reserve_id(symbol, order_type, created_dt)
-                
+
                 # Save with minimal metadata
                 self.save_order(client_order_id, order, metadata={"synced": True})
                 synced += 1
-            
+
             if synced > 0:
                 self._save()
-        
+
         return synced
-    
+
     def export_for_training(self, filepath: Path | str) -> int:
         """Export orders in format suitable for ML training."""
         data = self.get_orders_for_model_learning()

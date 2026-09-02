@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 
 from safety import assert_paper_environment
 
-
 load_dotenv()
 
 

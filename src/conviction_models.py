@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from enum import Enum
-from typing import FrozenSet, Tuple
+from datetime import datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class Direction(str, Enum):
+class Direction(StrEnum):
     BULLISH = "BULLISH"
     BEARISH = "BEARISH"
 
 
-class Decision(str, Enum):
+class Decision(StrEnum):
     TRADE = "TRADE"
     REJECT = "REJECT"
     ABSTAIN = "ABSTAIN"
 
 
-class EvidenceKind(str, Enum):
+class EvidenceKind(StrEnum):
     MARKET_DATA = "MARKET_DATA"
     NEWS = "NEWS"
     FUNDAMENTAL = "FUNDAMENTAL"
@@ -41,7 +40,7 @@ class EvidenceItem(BaseModel):
     freshness: int = Field(ge=0, le=100)
     corroboration_count: int = Field(ge=0)
     primary_source: bool = False
-    contradicts_evidence_ids: Tuple[str, ...] = ()
+    contradicts_evidence_ids: tuple[str, ...] = ()
 
     @field_validator("observed_at")
     @classmethod
@@ -54,10 +53,10 @@ class EvidenceItem(BaseModel):
 class EvidencePackage(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    items: Tuple[EvidenceItem, ...] = ()
+    items: tuple[EvidenceItem, ...] = ()
 
     @property
-    def ids(self) -> FrozenSet[str]:
+    def ids(self) -> frozenset[str]:
         return frozenset(item.evidence_id for item in self.items)
 
     def get(self, evidence_id: str) -> EvidenceItem:
@@ -66,7 +65,7 @@ class EvidencePackage(BaseModel):
                 return item
         raise KeyError(evidence_id)
 
-    def validate_refs(self, refs: Tuple[str, ...]) -> None:
+    def validate_refs(self, refs: tuple[str, ...]) -> None:
         missing = sorted(set(refs) - self.ids)
         if missing:
             raise ValueError(f"unknown evidence references: {missing}")
@@ -101,9 +100,9 @@ class OptionCandidate(BaseModel):
     underlying: str = Field(min_length=1)
     direction: Direction
     strategy: str = Field(min_length=1)
-    contracts: Tuple[str, ...] = Field(min_length=1)
+    contracts: tuple[str, ...] = Field(min_length=1)
     expiry: str = Field(min_length=1)
-    strikes: Tuple[float, ...] = Field(min_length=1)
+    strikes: tuple[float, ...] = Field(min_length=1)
     quantity: int = Field(gt=0)
     max_loss: float = Field(ge=0)
     max_reward: float = Field(ge=0)
@@ -121,20 +120,20 @@ class ThesisBase(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     summary: str = Field(min_length=1)
-    key_points: Tuple[str, ...] = Field(min_length=1)
-    invalidation_conditions: Tuple[str, ...] = Field(min_length=1)
-    evidence_ids: Tuple[str, ...] = Field(min_length=1)
+    key_points: tuple[str, ...] = Field(min_length=1)
+    invalidation_conditions: tuple[str, ...] = Field(min_length=1)
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
     confidence: int = Field(ge=0, le=100)
-    uncertainty: Tuple[str, ...] = ()
+    uncertainty: tuple[str, ...] = ()
 
 
 class BullThesis(ThesisBase):
-    catalysts: Tuple[str, ...] = ()
+    catalysts: tuple[str, ...] = ()
 
 
 class BearThesis(ThesisBase):
-    counterarguments: Tuple[str, ...] = Field(min_length=1)
-    risk_flags: Tuple[str, ...] = ()
+    counterarguments: tuple[str, ...] = Field(min_length=1)
+    risk_flags: tuple[str, ...] = ()
 
 
 class CIODecision(BaseModel):
@@ -145,8 +144,8 @@ class CIODecision(BaseModel):
     rationale: str = Field(min_length=1)
     strongest_bull_point: str = Field(min_length=1)
     strongest_bear_point: str = Field(min_length=1)
-    unresolved_contradictions: Tuple[str, ...] = ()
-    evidence_ids: Tuple[str, ...] = Field(min_length=1)
+    unresolved_contradictions: tuple[str, ...] = ()
+    evidence_ids: tuple[str, ...] = Field(min_length=1)
 
 
 class ConvictionResult(BaseModel):

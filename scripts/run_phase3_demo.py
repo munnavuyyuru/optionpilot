@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from agents import CIO, DeterministicBearAgent, DeterministicBullAgent
 from conviction_engine import ConvictionEngine
 from conviction_models import (
     Direction,
@@ -14,12 +15,11 @@ from conviction_models import (
     EvidencePackage,
     OptionCandidate,
 )
-from agents import CIO, DeterministicBearAgent, DeterministicBullAgent
 
 
 def make_mock_candidate(symbol: str = "QQQ") -> OptionCandidate:
     """Create a mock candidate for demo purposes."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     evidence = EvidencePackage(
         items=(
@@ -175,7 +175,7 @@ def main() -> int:
     print()
     print(f"CIO Rationale: {result.cio.rationale}")
     print()
-    print(f"Ledger: logs/decisions.jsonl")
+    print("Ledger: logs/decisions.jsonl")
     print("=" * 60)
 
     return 0

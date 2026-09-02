@@ -8,10 +8,9 @@ from options_data import (
     get_option_contracts,
 )
 from options_selector import select_candidates
+from risk import validate_candidate
 from scoring import rank_candidates
 from signals import calculate_market_signal
-from risk import validate_candidate
-
 
 UNIVERSE = (
     "SPY",

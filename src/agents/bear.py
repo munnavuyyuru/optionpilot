@@ -18,7 +18,7 @@ class DeterministicBearAgent(BearAgent):
 
         return BearThesis(
             summary=(
-                f"The candidate can fail if supporting evidence weakens or "
+                "The candidate can fail if supporting evidence weakens or "
                 "contradictory conditions intensify."
             ),
             key_points=(

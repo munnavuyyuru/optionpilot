@@ -12,7 +12,6 @@ Examples:
 from datetime import datetime
 from typing import Literal
 
-
 OrderType = Literal["STOCK", "CALL", "PUT", "SPREAD", "BRACKET", "OCO", "OTO"]
 
 
@@ -36,16 +35,16 @@ def generate_client_order_id(
     """
     if date is None:
         date = datetime.utcnow()
-    
+
     date_str = date.strftime("%Y%m%d")
     symbol_clean = symbol.upper().replace("/", "-").replace(":", "-")
     type_clean = order_type.upper()
-    
+
     if sequence is not None:
         seq_str = f"{sequence:04d}"
     else:
         seq_str = "0000"  # Placeholder, will be replaced by order_store
-    
+
     return f"OP-{date_str}-{symbol_clean}-{type_clean}-{seq_str}"
 
 
@@ -60,7 +59,7 @@ def parse_client_order_id(client_order_id: str) -> dict | None:
         parts = client_order_id.split("-")
         if len(parts) != 5 or parts[0] != "OP":
             return None
-        
+
         return {
             "prefix": parts[0],
             "date": parts[1],  # YYYYMMDD

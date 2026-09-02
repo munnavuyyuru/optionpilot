@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from conviction_models import BullThesis, BearThesis, CIODecision, Decision, EvidencePackage
+from conviction_models import BearThesis, BullThesis, CIODecision, Decision, EvidencePackage
 
 
 @dataclass(frozen=True)

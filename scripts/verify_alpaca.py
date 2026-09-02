@@ -10,10 +10,10 @@ import os
 import sys
 from typing import NamedTuple
 
-from dotenv import load_dotenv
+from alpaca.data.historical import OptionHistoricalDataClient, StockHistoricalDataClient
+from alpaca.data.requests import OptionChainRequest, StockLatestTradeRequest
 from alpaca.trading.client import TradingClient
-from alpaca.data.historical import StockHistoricalDataClient, OptionHistoricalDataClient
-from alpaca.data.requests import StockLatestTradeRequest, OptionChainRequest
+from dotenv import load_dotenv
 
 
 class CheckResult(NamedTuple):

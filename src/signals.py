@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from market_data import PriceBar
 
@@ -117,7 +117,7 @@ def _direction(
 
 
 def _make_evidence_id(symbol: str, component_name: str) -> str:
-    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    date_str = datetime.now(UTC).strftime("%Y%m%d")
     return f"SIG-{component_name.upper()}-{symbol.upper()}-{date_str}"
 
 

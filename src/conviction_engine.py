@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
-from conviction_models import ConvictionResult, Decision, OptionCandidate
+from agents import BearAgent, BullAgent
+from conviction_models import ConvictionResult, OptionCandidate
 from conviction_policy import ConvictionPolicy
 from decision_ledger import DecisionLedger
-from agents import BearAgent, BullAgent
 
 
 class ConvictionEngine:
@@ -49,7 +49,7 @@ class ConvictionEngine:
 
         result = ConvictionResult(
             decision_id=f"DEC-{uuid4().hex[:12].upper()}",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             candidate=candidate,
             bull=bull,
             bear=bear,
