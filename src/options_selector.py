@@ -164,3 +164,70 @@ def select_candidates(
     )
 
     return candidates
+
+
+def build_debit_spread(
+    direction: str,
+    long_contract: OptionContractData,
+    chain: dict[str, OptionSnapshotData],
+    width: float = 5.0,
+) -> tuple[OptionContractData, OptionContractData] | None:
+    """
+    Build a debit spread from a long option contract.
+
+    Bullish: long call at K, short call at K + width
+    Bearish: long put at K, short put at K - width
+
+    Returns (long_leg, short_leg) or None if short leg not found.
+    """
+    if direction == "bullish":
+        required_type = "call"
+        short_strike = long_contract.strike_price + width
+    else:
+        required_type = "put"
+        short_strike = long_contract.strike_price - width
+
+    # Find short leg with same expiry, different strike
+    for symbol, contract in chain.items():
+        parsed = _parse_contract_symbol(symbol)
+        if not parsed:
+            continue
+
+        if (parsed["type"] == required_type
+            and abs(parsed["strike"] - short_strike) < 0.01
+            and parsed["expiry"] == long_contract.expiration_date):
+
+            short_contract = OptionContractData(
+                symbol=symbol,
+                contract_id=contract.get("contract_id", ""),
+                underlying_symbol=long_contract.underlying_symbol,
+                expiration_date=long_contract.expiration_date,
+                strike_price=parsed["strike"],
+                option_type=required_type,
+                tradable=True,
+                open_interest=int(contract.get("open_interest", 0)),
+            )
+            return (long_contract, short_contract)
+
+    return None
+
+
+def _parse_contract_symbol(symbol: str) -> dict | None:
+    """Parse OCC option symbol to extract type, strike, expiry."""
+    import re
+    match = re.match(r'^([A-Z]+)(\d{6})([CP])(\d{8})$', symbol)
+    if not match:
+        return None
+
+    underlying, date_str, opt_type, strike_str = match.groups()
+    year = 2000 + int(date_str[:2])
+    month = int(date_str[2:4])
+    day = int(date_str[4:6])
+    strike = int(strike_str) / 1000
+
+    return {
+        "underlying": underlying,
+        "expiry": date(year, month, day),
+        "type": "call" if opt_type == "C" else "put",
+        "strike": strike,
+    }
