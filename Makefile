@@ -1,4 +1,4 @@
-.PHONY: verify install test lint format clean
+.PHONY: verify install test lint format clean scan ci
 
 # Default target
 all: verify
@@ -24,11 +24,19 @@ format:
 	ruff format src/ scripts/
 	black src/ scripts/
 
+# Run market scanner
+scan:
+	python scripts/scan_market.py --top 10
+
+# Run market scanner with output
+scan-output:
+	python scripts/scan_market.py --top 10 --output scan_results.json
+
+# Run full CI pipeline locally
+ci: lint test verify
+
 # Clean build artifacts
 clean:
 	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/ .mypy_cache/
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
-
-# Run full CI pipeline locally
-ci: lint test verify

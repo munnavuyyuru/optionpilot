@@ -11,3 +11,86 @@ risk:
 
 agent:
   autonomous_execution: false
+
+scanning:
+  universe: "watchlist"
+  watchlist_symbols: ["AAPL", "MSFT", "NVDA", "TSLA", "SPY", "QQQ", "META", "GOOGL", "AMD", "NFLX"]
+  top: 20
+  min_price: 10
+  max_price: 500
+  min_volume: 1000000
+
+signals:
+  enabled: ["momentum_breakout", "mean_reversion", "macd_crossover", "volume_spike"]
+  momentum_breakout:
+    lookback: 20
+  mean_reversion:
+    rsi_period: 14
+    oversold: 30
+    overbought: 70
+  macd_crossover:
+    fast: 12
+    slow: 26
+    signal: 9
+  volume_spike:
+    multiplier: 2.0
+
+options_selection:
+  target_delta: 0.35
+  delta_tolerance: 0.10
+  min_dte: 14
+  max_dte: 45
+  min_open_interest: 100
+  min_volume: 50
+  max_spread_pct: 0.05
+
+scoring:
+  weights:
+    signal_strength: 0.30
+    iv_rank: 0.15
+    delta_target: 0.15
+    liquidity: 0.15
+    risk_reward: 0.15
+    dte_sweet_spot: 0.10
+
+agent:
+  autonomous_execution: false
+  max_concurrent: 2
+  require_approval: true
+
+phase2:
+  universe:
+    symbols:
+      - SPY
+      - QQQ
+      - NVDA
+      - AAPL
+      - MSFT
+      - TSLA
+
+  historical_data:
+    lookback_days: 120
+    timeframe: 1Day
+
+  options:
+    min_dte: 21
+    max_dte: 45
+
+    strike_min_pct: 0.90
+    strike_max_pct: 1.10
+
+    max_contracts: 500
+
+  liquidity:
+    min_open_interest: 100
+    max_spread_pct: 0.10
+
+  scoring:
+    minimum_candidate_score: 75.0
+
+  risk:
+    max_debit_usd: 1000.0
+    max_contracts: 1
+
+  execution:
+    enabled: false
