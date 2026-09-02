@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from market_data import PriceBar
 
@@ -11,6 +12,7 @@ class SignalComponent:
     score: float | None
     weight: float
     reason: str
+    evidence_id: str
 
 
 @dataclass(frozen=True)
@@ -114,6 +116,11 @@ def _direction(
     return "neutral"
 
 
+def _make_evidence_id(symbol: str, component_name: str) -> str:
+    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    return f"SIG-{component_name.upper()}-{symbol.upper()}-{date_str}"
+
+
 def calculate_market_signal(
     symbol: str,
     bars: list[PriceBar],
@@ -132,6 +139,7 @@ def calculate_market_signal(
             reason=(
                 "20-day SMA versus 50-day SMA."
             ),
+            evidence_id=_make_evidence_id(symbol, "regime"),
         ),
         SignalComponent(
             name="momentum",
@@ -140,6 +148,7 @@ def calculate_market_signal(
             reason=(
                 "20-session price momentum."
             ),
+            evidence_id=_make_evidence_id(symbol, "momentum"),
         ),
         SignalComponent(
             name="technical",
@@ -148,6 +157,7 @@ def calculate_market_signal(
             reason=(
                 "Short/medium moving-average relationship."
             ),
+            evidence_id=_make_evidence_id(symbol, "technical"),
         ),
         SignalComponent(
             name="sentiment",
@@ -157,6 +167,7 @@ def calculate_market_signal(
                 "Unavailable: no sentiment data source "
                 "is configured in Phase 2."
             ),
+            evidence_id=_make_evidence_id(symbol, "sentiment"),
         ),
         SignalComponent(
             name="volatility",
@@ -166,6 +177,7 @@ def calculate_market_signal(
                 "Reserved for realized/option-implied "
                 "volatility integration."
             ),
+            evidence_id=_make_evidence_id(symbol, "volatility"),
         ),
     )
 
