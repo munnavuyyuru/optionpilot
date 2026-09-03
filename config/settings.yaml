@@ -108,3 +108,17 @@ phase3:
   strategies:
     bullish: "BULL_CALL_DEBIT_SPREAD"
     bearish: "BEAR_PUT_DEBIT_SPREAD"
+
+phase4:
+  risk_file: "risk.yaml"
+  evidence:
+    minimum_score: 75.0
+    minimum_conviction: 75.0
+    max_contradictions: 3
+    max_market_data_age_seconds: 120
+    required_categories:
+      - TECHNICAL
+      - OPTIONS
+      - RISK
+  execution:
+    enabled: false
