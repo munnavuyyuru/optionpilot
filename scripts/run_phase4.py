@@ -114,7 +114,7 @@ def make_mock_candidate(symbol: str = "QQQ") -> OptionCandidate:
         quantity=1,
         max_loss=420.0,
         max_reward=1080.0,
-        signal_score=84.0,
+        signal_score=95.0,
         evidence=evidence,
     )
 
@@ -255,7 +255,7 @@ def make_mock_risk_blocked_candidate(symbol: str = "QQQ") -> OptionCandidate:
         quantity=1,
         max_loss=420.0,
         max_reward=1080.0,
-        signal_score=84.0,
+        signal_score=95.0,
         evidence=evidence,
     )
 
@@ -342,7 +342,6 @@ def run_scenario(pipeline, candidate, symbol):
         bull_agent=DeterministicBullAgent(),
         bear_agent=DeterministicBearAgent(),
         cio=CIO(),
-        policy=ConvictionPolicy(),
     )
     conviction_result = engine.evaluate(candidate)
 
@@ -389,7 +388,6 @@ def run_scenario_with_portfolio(pipeline, candidate, symbol, high_exposure=False
         bull_agent=DeterministicBullAgent(),
         bear_agent=DeterministicBearAgent(),
         cio=CIO(),
-        policy=ConvictionPolicy(),
     )
     conviction_result = engine.evaluate(candidate)
 
@@ -473,7 +471,7 @@ def run_live_demo(symbol: str):
     print("Use --mock for demonstration.")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Phase 4 Evidence Gate + Risk Sentinel Demo")
     parser.add_argument(
         "--symbol",
@@ -493,6 +491,8 @@ def main():
     else:
         run_mock_demo()
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    exit(main())

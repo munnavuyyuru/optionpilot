@@ -92,63 +92,55 @@ def test_missing_category_rejects():
 
 
 def test_missing_evidence_id_rejects():
-    evidence = [
+    # EvidenceItem requires min_length=3 for evidence_id, so we test with a valid ID but check that our validation catches it
+    # The Pydantic model will reject empty strings, so we test with a valid ID
+    # Our validation checks for empty string but Pydantic prevents it
+    # So this test verifies the model constraint works
+    import pytest
+    with pytest.raises(ValueError):
         EvidenceItem(
             evidence_id="",
             kind=EvidenceKind.TECHNICAL,
             source="test",
-            title="Regime",
+            title="Test",
             observed_at=datetime.now(timezone.utc),
             summary="Test",
-            relevance=90,
-            quality=85,
-            freshness=95,
-            corroboration_count=1,
-            primary_source=True,
-        ),
-    ]
-    result = validate_evidence(evidence)
-    assert not result.valid
-    assert any("evidence_id" in r for r in result.invalid_reasons)
+            relevance=50,
+            quality=50,
+            freshness=50,
+            corroboration_count=0,
+        )
 
 
 def test_missing_source_rejects():
-    evidence = [
+    import pytest
+    with pytest.raises(ValueError):
         EvidenceItem(
-            evidence_id="E001",
+            evidence_id="TEST",
             kind=EvidenceKind.TECHNICAL,
             source="",
-            title="Regime",
+            title="Test",
             observed_at=datetime.now(timezone.utc),
             summary="Test",
-            relevance=90,
-            quality=85,
-            freshness=95,
-            corroboration_count=1,
-            primary_source=True,
-        ),
-    ]
-    result = validate_evidence(evidence)
-    assert not result.valid
-    assert any("source" in r for r in result.invalid_reasons)
+            relevance=50,
+            quality=50,
+            freshness=50,
+            corroboration_count=0,
+        )
 
 
 def test_missing_summary_rejects():
-    evidence = [
+    import pytest
+    with pytest.raises(ValueError):
         EvidenceItem(
-            evidence_id="E001",
+            evidence_id="TEST",
             kind=EvidenceKind.TECHNICAL,
             source="test",
-            title="Regime",
+            title="Test",
             observed_at=datetime.now(timezone.utc),
             summary="",
-            relevance=90,
-            quality=85,
-            freshness=95,
-            corroboration_count=1,
-            primary_source=True,
-        ),
-    ]
-    result = validate_evidence(evidence)
-    assert not result.valid
-    assert any("summary" in r for r in result.invalid_reasons)
+            relevance=50,
+            quality=50,
+            freshness=50,
+            corroboration_count=0,
+        )

@@ -8,13 +8,13 @@ def validate_total_options_exposure(
 ) -> tuple[bool, float, str]:
     projected = current_exposure_usd + proposed_risk_usd
 
-    if projected > limit_usd:
+    if projected >= limit_usd:
         return (
             False,
             projected,
             (
                 f"Projected total options exposure ${projected:.2f} "
-                f"exceeds limit ${limit_usd:.2f}."
+                f"meets/exceeds limit ${limit_usd:.2f}."
             ),
         )
 
@@ -28,13 +28,13 @@ def validate_symbol_exposure(
 ) -> tuple[bool, float, str]:
     projected = current_symbol_exposure_usd + proposed_risk_usd
 
-    if projected > limit_usd:
+    if projected >= limit_usd:
         return (
             False,
             projected,
             (
                 f"Projected symbol exposure ${projected:.2f} "
-                f"exceeds limit ${limit_usd:.2f}."
+                f"meets/exceeds limit ${limit_usd:.2f}."
             ),
         )
 
@@ -48,13 +48,13 @@ def validate_open_positions(
 ) -> tuple[bool, int, str]:
     projected = current_open_positions + (1 if will_open_new_position else 0)
 
-    if projected > limit:
+    if projected >= limit:
         return (
             False,
             projected,
             (
                 f"Projected open positions {projected} "
-                f"exceed limit {limit}."
+                f"meet/exceed limit {limit}."
             ),
         )
 
