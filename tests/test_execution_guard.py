@@ -44,8 +44,8 @@ def test_guard_rejects_missing_approval():
     guard = ExecutionGuard({"execution": {"enabled": True}})
     decision = Phase4Decision(
         decision_id="DEC-001", symbol="QQQ", direction="BULLISH", conviction=85,
-        evidence=EvidenceDecision(status="PASS", score=85, completeness=1.0, checks=(), contradictions=(), missing=(), reasons=()),
-        risk=None, final_status="REJECTED", execution_intent=None,
+        evidence=EvidenceDecision(status=EvidenceStatus.PASS, score=85, completeness=1.0, checks=(), contradictions=(), missing=(), reasons=()),
+        risk=None, final_status=FinalStatus.REJECTED, execution_intent=None,
         created_at=datetime.now(timezone.utc),
     )
     intent = ExecutionIntent(decision_id="DEC-001", symbol="QQQ", direction="BULLISH",

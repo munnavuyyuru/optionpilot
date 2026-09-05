@@ -47,4 +47,4 @@ def test_verify_missing_position():
     result = verifier.verify("ALP-001", "QQQ", 1, 420.0)
 
     assert not result.verified
-    assert any("position" in d for d in result.discrepancies)
+    assert any("Position check failed" in d for d in result.discrepancies)

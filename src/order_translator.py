@@ -36,14 +36,14 @@ class OrderTranslator:
             legs.append(OptionLegRequest(
                 symbol=leg.symbol,
                 side=leg.side.value,
-                ratio_quantity=leg.quantity,
+                ratio_qty=leg.quantity,
             ))
 
         if intent.order_type == OrderType.MARKET:
             request = MarketOrderRequest(
                 symbol=intent.symbol,
                 legs=legs,
-                quantity=intent.quantity,
+                qty=intent.quantity,
                 time_in_force=TimeInForce.DAY,
                 order_class=OrderClass.MLEG,
             )
@@ -51,7 +51,7 @@ class OrderTranslator:
             request = LimitOrderRequest(
                 symbol=intent.symbol,
                 legs=legs,
-                quantity=intent.quantity,
+                qty=intent.quantity,
                 limit_price=limit_price or Decimal("0"),
                 time_in_force=TimeInForce.DAY,
                 order_class=OrderClass.MLEG,

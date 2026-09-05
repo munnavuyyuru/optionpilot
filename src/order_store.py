@@ -18,7 +18,7 @@ try:
 except ImportError:
     HAS_PORTALOCKER = False
 
-from .order_id import generate_client_order_id
+from order_id import generate_client_order_id
 
 DEFAULT_STORE_PATH = Path("orders.json")
 

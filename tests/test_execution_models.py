@@ -36,6 +36,8 @@ def test_execution_record_creation():
         submitted_at=datetime.now(timezone.utc),
         filled_at=datetime.now(timezone.utc),
         verified_at=datetime.now(timezone.utc),
+        error_code=None,
+        error_message=None,
         paper=True,
     )
     assert record.symbol == "QQQ"

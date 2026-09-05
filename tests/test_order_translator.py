@@ -16,8 +16,8 @@ def test_translate_limit_order():
         direction="BULLISH",
         strategy="BULL_CALL_DEBIT_SPREAD",
         legs=(
-            OptionLeg(symbol="QQQ260918C00650000", side="buy", quantity=1),
-            OptionLeg(symbol="QQQ260918C00665000", side="sell", quantity=1),
+            OptionLeg(symbol="QQQ260918C00650000", side=OrderSide.BUY, quantity=1),
+            OptionLeg(symbol="QQQ260918C00665000", side=OrderSide.SELL, quantity=1),
         ),
         option_contracts=("QQQ260918C00650000", "QQQ260918C00665000"),
         quantity=1,
@@ -34,13 +34,13 @@ def test_translate_limit_order():
     # Check that it's a LimitOrderRequest with correct parameters
     assert hasattr(request, 'symbol')
     assert request.symbol == "QQQ"
-    assert request.quantity == 1
+    assert request.qty == 1
     assert request.limit_price == 4.20
     assert len(request.legs) == 2
 
 
 def test_generate_client_order_id():
-    from execution_models import ExecutionIntent, OptionLeg
+    from execution_models import ExecutionIntent, OptionLeg, OrderSide
     from datetime import datetime, timezone
 
     intent = ExecutionIntent(
@@ -51,7 +51,7 @@ def test_generate_client_order_id():
         direction="BULLISH",
         strategy="BULL_CALL_DEBIT_SPREAD",
         legs=(
-            OptionLeg(symbol="QQQ260918C00650000", side="buy", quantity=1),
+            OptionLeg(symbol="QQQ260918C00650000", side=OrderSide.BUY, quantity=1),
         ),
         option_contracts=("QQQ260918C00650000",),
         quantity=1,

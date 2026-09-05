@@ -17,7 +17,7 @@ def test_wait_for_fill_success():
     monitor = OrderMonitor(client=mock_client, poll_interval=0.01)
     result = monitor.wait_for_fill("ALP-001", timeout=5)
 
-    assert result.status == "FILLED"
+    assert result.status == "filled"
     assert result.filled_quantity == 1
     assert result.filled_avg_price == 4.20
 
@@ -32,7 +32,7 @@ def test_wait_for_fill_cancelled():
     monitor = OrderMonitor(client=mock_client, poll_interval=0.01)
     result = monitor.wait_for_fill("ALP-001", timeout=5)
 
-    assert result.status == "CANCELED"
+    assert result.status == "canceled"
     assert result.filled_quantity == 0
 
 

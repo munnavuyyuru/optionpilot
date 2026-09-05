@@ -63,6 +63,36 @@ class AlpacaOrderRequest:
 
 
 @dataclass(frozen=True)
+class ExecutionIntent:
+    intent_id: str
+    decision_id: str
+    candidate_id: str
+    symbol: str
+    direction: str
+    strategy: str
+    legs: tuple[OptionLeg, ...]
+    option_contracts: tuple[str, ...]
+    quantity: int
+    order_type: OrderType
+    limit_price: Decimal
+    max_loss_usd: float
+    max_reward_usd: float
+    created_at: datetime
+
+
+@dataclass(frozen=True)
+class AlpacaOrderRequest:
+    client_order_id: str
+    symbol: str
+    legs: tuple[OptionLeg, ...]
+    order_type: OrderType
+    limit_price: Decimal | None
+    quantity: int
+    time_in_force: TimeInForce
+    order_class: str
+
+
+@dataclass(frozen=True)
 class ExecutionRecord:
     execution_id: str
     intent_id: str
