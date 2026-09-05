@@ -122,3 +122,9 @@ phase4:
       - RISK
   execution:
     enabled: false
+
+phase5:
+  execution_file: "execution.yaml"
+  recovery:
+    enabled: true
+    reconcile_on_startup: true
