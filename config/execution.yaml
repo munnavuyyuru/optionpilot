@@ -1,0 +1,26 @@
+environment: paper
+
+execution:
+  enabled: true
+  paper_only: true
+
+  require_phase4_approval: true
+  require_evidence_gate: true
+  require_risk_approval: true
+
+  allow_market_orders: false
+  allow_limit_orders: true
+
+  max_order_notional_usd: 1000
+
+  duplicate_order_window_seconds: 300
+  order_timeout_seconds: 120
+  max_retry_attempts: 3
+  retry_delay_seconds: 5
+
+  verify_position_after_fill: true
+  allow_partial_fills: true
+  max_partial_fill_wait_seconds: 120
+  cancel_remaining_on_partial: true
+
+  autonomous_execution: true
